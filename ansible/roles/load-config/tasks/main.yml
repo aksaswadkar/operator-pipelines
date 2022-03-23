@@ -1,6 +1,4 @@
 ---
-- name:
-  ansible.builtin.command: pwd
 - name: "Check if '{{ lc_config }}' file exists"
   ansible.builtin.stat:
     path: "{{ lc_config }}"
