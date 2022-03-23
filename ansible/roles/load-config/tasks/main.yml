@@ -1,0 +1,24 @@
+---
+- name: "Check if '{{ lc_config }}' file exists"
+  ansible.builtin.stat:
+    path: "{{ lc_config }}"
+  register: lc_config_st
+
+- name: "Fail when file '{{ lc_config }}' doesn't exists"
+  ansible.builtin.fail:
+    msg: "Config file '{{ lc_config }}' doens't exists !!!"
+  when: not lc_config_st.stat.exists
+
+- name: "Getting content from '{{ lc_config }}'"
+  ansible.builtin.command: "cat {{ lc_config }}"
+  register: lc_config_data
+  changed_when: false
+
+- name: "Sets config variables from '{{ lc_config }}' to 'op_config'"
+  ansible.builtin.set_fact:
+    op_config: "{{ lc_config_data.stdout | from_yaml }}"
+  when: lc_config_data.rc == 0
+
+- name: "Print 'op_config' information"
+  ansible.builtin.debug:
+    var: op_config
