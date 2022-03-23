@@ -4,4 +4,4 @@
   gather_facts: true
 
   roles:
-    - {role: load-config, lc_config: "/tmp/config.yaml",tags: ["config"]}
+    - {role: load-config, lc_config: "upstream-community-config.yaml",tags: ["config"]}
