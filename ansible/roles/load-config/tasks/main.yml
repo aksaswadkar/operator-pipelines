@@ -18,7 +18,7 @@
   ansible.builtin.set_fact:
     op_config: "{{ lc_config_data.stdout | from_yaml }}"
   when:
-    - lc_config_data is defined
+    - lc_config_data.rc is defined
     - lc_config_data.rc == 0
 
 - name: "Print 'op_config' information"
