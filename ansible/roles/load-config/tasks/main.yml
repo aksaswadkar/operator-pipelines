@@ -13,12 +13,13 @@
   ansible.builtin.command: "cat {{ lc_config }}"
   register: lc_config_data
   changed_when: false
-- debug:
-    var: lc_config_data
+
 - name: "Sets config variables from '{{ lc_config }}' to 'op_config'"
   ansible.builtin.set_fact:
     op_config: "{{ lc_config_data.stdout | from_yaml }}"
-  when: lc_config_data.rc == 0
+  when:
+    - lc_config_data is defined
+    - lc_config_data.rc == 0
 
 - name: "Print 'op_config' information"
   ansible.builtin.debug:
