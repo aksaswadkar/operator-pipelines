@@ -4,4 +4,10 @@
   gather_facts: true
 
   roles:
-    - {role: load-config, lc_config: "upstream-community-config.yaml",tags: ["config"]}
+    - { role: include_vars, var_name: "uc_config", var_file: "upstream-community-config.yaml", var_remote_src: false }
+    - { role: install_kind_cluster }
+
+  tasks:
+    - name: "Print 'config'"
+      debug:
+        var: uc_config

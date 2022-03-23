@@ -1,0 +1,12 @@
+---
+- name: "Install kind cluster"
+  block:
+
+    - name: Set the retry count
+      set_fact:
+        kind_cluster_install_retry: 1
+
+    - include_tasks: cluster_install.yml
+
+  tags:
+    - always
