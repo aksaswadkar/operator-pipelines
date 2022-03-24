@@ -16,5 +16,3 @@
   retries: 10
   delay: 15
   when: oc_version_result.rc is defined or oc_version_result.rc != 0 or oc_version_result.stdout_lines[0].split(' ')[2] != oc_version
-
-- 
