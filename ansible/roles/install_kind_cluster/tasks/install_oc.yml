@@ -1,0 +1,20 @@
+---
+- name: "Check '{{ oc_binary }}' version"
+  ansible.builtin.command: "{{ oc_binary }} version"
+  register: oc_version_result
+  changed_when: false
+  failed_when: false
+
+- name: "Download and extract OpenShift client binary 'oc' ({{ oc_version }}) to {{ op_bin_dir }}/{{ oc_binary }}"
+  unarchive:
+    src: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ oc_version }}/openshift-client-linux-{{ oc_version }}.tar.gz"
+    dest: "{{ op_bin_dir }}"
+    remote_src: true
+    exclude: ["kubectl", "README.md"]
+  register: download_and_unpack_oc
+  until: download_and_unpack_oc is succeeded
+  retries: 10
+  delay: 15
+  when: oc_version_result.rc is defined or oc_version_result.rc != 0 or oc_version_result.stdout_lines[0].split(' ')[2] != oc_version
+
+- 
