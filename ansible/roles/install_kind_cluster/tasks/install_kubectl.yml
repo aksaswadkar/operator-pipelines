@@ -1,0 +1,39 @@
+---
+- name: "Install kubectl {{ kubectl_version }}"
+  block:
+    - name: "Remove kubectl version file '{{ ikc_tmp_dir }}/kubectl_version'"
+      ansible.builtin.file:
+        path: "{{ ikc_tmp_dir }}/kubectl_version"
+        state: absent
+
+    - name: "Get kubectl Version"
+      ansible.builtin.get_url:
+        url: "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+        dest: "{{ ikc_tmp_dir }}/kubectl_version"
+
+    - name: "Read kubectl Version from url"
+      ansible.builtin.command: cat {{ ikc_tmp_dir }}/kubectl_version
+      register: kubectl_version_data
+
+    - name: "Setting kubectl version"
+      ansible.builtin.set_fact:
+        kubectl_version: "{{ kubectl_version_data.stdout }}"
+  when: kubectl_version == "latest"
+
+- name: "Check '{{ kubectl_binary }}' version"
+  ansible.builtin.command: "{{ kubectl_binary }} version"
+  register: kubectl_version_result
+  changed_when: false
+  failed_when: false
+
+- name: "Install kubectl ({{ kubectl_version }})"
+  ansible.builtin.get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+    dest: "{{ op_bin_dir }}/{{ kubectl_binary }}"
+    mode: "0755"
+  register: kubectl_install_result
+  until: kubectl_install_result.status_code is undefined or kubectl_install_result.status_code == 200
+  retries: 10
+  delay: 15
+  failed_when: kubectl_install_result is failure
+  when: kubectl_version_result.rc is defined or kubectl_version_result.rc != 0 or kubectl_version_result.stdout.stdout_lines[0].split('"')[5] != kubectl_version

@@ -2,11 +2,21 @@
 - name: "Install kind cluster"
   block:
 
-    - name: Set the retry count
-      set_fact:
+    - name: "Ensure that the '{{ ikc_tmp_dir }}' directory exists and is empty"
+      file:
+        state: "{{ item }}"
+        path: "{{ ikc_tmp_dir }}"
+        mode: "755"
+      with_items:
+        - absent
+        - directory
+
+    - name: "Set initial 'kind_cluster_install_retry'"
+      ansible.builtin.set_fact:
         kind_cluster_install_retry: 1
 
-    - include_tasks: cluster_install.yml
+    - name: "Install cluster '{{ kind_cluster_name }}'"
+      ansible.builtin.include_tasks: install.yml
 
   tags:
     - always

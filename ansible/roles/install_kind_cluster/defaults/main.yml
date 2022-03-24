@@ -1,5 +1,26 @@
 ---
+op_work_dir: "/tmp/.op"
+ikc_tmp_dir: "{{ op_work_dir }}/kind"
+op_bin_dir: "{{ op_work_dir }}/bin"
+kind_cluster_name: "test"
+kund_cluster_install_retries: 1
 kind_version: v0.12.0
 kind_kube_version: v1.23.4
-kind_cluster_name: "test"
-kund_cluster_install_retries: 2
+kind_config_path: "{{ ikc_tmp_dir }}/kind_config.yaml"
+kind_config_map_registry_path: "{{ ikc_tmp_dir }}/kind_config_map_registry.yaml"
+kind_binary: kind
+registry_enable: false
+registry_name: kind-registry
+registry_host: kind-registry
+registry_port: 5000
+registry_ssl: false
+registry_cert_dir: "{{ op_work_dir }}/certs"
+container_tool: podman
+kubectl_binary: kubectl
+kubectl_version: latest
+oc_binary: oc
+oc_version: 4.3.5
+operator_sdk_binary: operator-sdk
+operator_sdk_version: v1.18.1
+olm_version: v0.20.0
+tekton_enable: false

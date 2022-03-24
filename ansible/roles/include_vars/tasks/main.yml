@@ -33,3 +33,8 @@
         - var_file_data.rc == 0
 
   when: var_remote_src|bool
+
+- name: "Print variable '{{ var_name }}'"
+  debug:
+    var: "{{ var_name }}"
+  when: var_verbose|bool

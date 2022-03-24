@@ -1,0 +1,49 @@
+---
+- name: "Install kind cluster '{{ kind_cluster_name }}' (Wait until success)"
+  block:
+    - name: "Cleanup cluster '{{ kind_cluster_name }}'"
+      include_tasks: cleanup.yml
+
+    - name: "Generating kind config file"
+      template:
+        src: kind_config.yaml.j2
+        dest: "{{ kind_config_path }}"
+        mode: "0644"
+
+    - name: "Create kind cluster '{{ kind_cluster_name }}'"
+      ansible.builtin.command: "{{ kind_binary }} create cluster --name {{ kind_cluster_name }} --image kindest/node:{{ kind_kube_version }} --config={{ kind_config_path }}"
+
+    - name: "Install registry"
+      ansible.builtin.include_tasks: install_registry.yml
+      when: registry_enable|bool
+
+    - name: "Install operator-sdk"
+      ansible.builtin.include_tasks: install_operator_sdk.yml
+
+    - name: "Install olm"
+      ansible.builtin.include_tasks: install_olm.yml
+
+    - name: "Install oc"
+      ansible.builtin.include_tasks: install_oc.yml
+
+    - name: "Install kubectl"
+      ansible.builtin.include_tasks: install_kubectl.yml
+
+  tags:
+    - always
+  rescue:
+    - name: "Fail after {{ kund_cluster_install_retries }} retries"
+      fail:
+        msg: "Failed to install kind cluster '{{ kind_cluster_name }}' after ({{ kind_cluster_install_retry|int }}/{{ kund_cluster_install_retries }}) retries"
+      when: kind_cluster_install_retry|int >= kund_cluster_install_retries|int
+
+    - name: "Printing process info"
+      debug:
+        msg: "Failed to install kind - Going to retry ({{ kind_cluster_install_retry|int + 1 }}/{{ kund_cluster_install_retries }}) ..."
+
+    - name: "Increase 'kind_cluster_install_retry' by 1"
+      set_fact:
+        kind_cluster_install_retry: "{{ kind_cluster_install_retry|int + 1 }}"
+
+    - name: "Install cluster '{{ kind_cluster_name }}'"
+      ansible.builtin.include_tasks: install.yml

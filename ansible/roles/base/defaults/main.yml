@@ -1,0 +1,4 @@
+---
+op_work_dir: "/tmp/.op"
+op_bin_dir: "{{ op_work_dir }}/bin"
+oc_config_file: "upstream-community-config.yaml"

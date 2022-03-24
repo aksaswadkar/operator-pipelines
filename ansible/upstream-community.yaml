@@ -2,12 +2,17 @@
   hosts: all
   become: false
   gather_facts: true
+  vars:
+    op_work_dir: "{{ ansible_env.HOME }}/.op"
+    op_bin_dir: "{{ op_work_dir }}/bin"
+    registry_cert_dir: "{{ op_work_dir }}/certs"
+
+  environment:
+    # User has to do 'export SSL_CERT_DIR=$HOME/.op/certs' when running in rootless mode
+    SSL_CERT_DIR: "{{ registry_cert_dir }}"
+    PATH: "{{ op_bin_dir }}:{{ ansible_env.PATH }}"
 
   roles:
-    - { role: include_vars, var_name: "uc_config", var_file: "upstream-community-config.yaml", var_remote_src: false }
+    - { role: base }
     - { role: install_kind_cluster }
 
-  tasks:
-    - name: "Print 'config'"
-      debug:
-        var: uc_config

@@ -1,0 +1,18 @@
+---
+- name: "Check '{{ operator_sdk_binary }}' version"
+  ansible.builtin.command: "{{ operator_sdk_binary }} version"
+  register: opsdk_version_result
+  changed_when: false
+  failed_when: false
+
+- name: "Install operator-sdk {{ operator_sdk_version }}"
+  ansible.builtin.get_url:
+    url: https://github.com/operator-framework/operator-sdk/releases/download/{{ operator_sdk_version }}/operator-sdk_linux_amd64
+    dest: "{{ op_bin_dir }}/{{ operator_sdk_binary }}"
+    mode: "0755"
+  register: operator_sdk_install_result
+  until: operator_sdk_install_result.status_code is undefined or operator_sdk_install_result.status_code == 200
+  retries: 10
+  delay: 15
+  failed_when: operator_sdk_install_result is failure
+  when: opsdk_version_result.rc is defined or opsdk_version_result.rc != 0 or opsdk_version_result.stdout.split('"')[1] != operator_sdk_version
